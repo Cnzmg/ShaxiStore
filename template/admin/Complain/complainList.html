@@ -1,0 +1,224 @@
+{extend name="admin/base" /}
+{block name="resources"/}
+<link rel="stylesheet" type="text/css" href="ADMIN_CSS/product.css">
+<style type="text/css">
+    .tr-title {
+        height: 30px;
+        background: #E3E3E3;
+        border: 1px solid rgba(234, 233, 233, 0.51);
+    }
+
+    .fun-a {
+        margin-top: 0px;
+        padding: 6px 15px 0 15px;
+    }
+
+    .a-pro-view-img {
+        float: left;
+    }
+
+    .thumbnail-img {
+        width: 60px;
+        margin-right: 10px;
+    }
+
+    .cell i {
+        display: block;
+    }
+
+    .remodal-bg.with-red-theme.remodal-is-opening, .remodal-bg.with-red-theme.remodal-is-opened
+    {
+        filter: none;
+    }
+
+    .remodal-overlay.with-red-theme {
+        background-color: #f44336;
+    }
+
+    .remodal.with-red-theme {
+        background: #fff;
+    }
+
+    input[type="radio"], input[type="checkbox"] {
+        margin: -1px 5px 0;
+        margin-left: 0px;
+    }
+
+    .edit-group {
+        border-bottom: 1px solid #ebebeb;
+        margin-bottom: 10px;
+    }
+
+    .edit-group label {
+        font-weight: normal;
+    }
+
+    .edit-group-title {
+        height: 15px;
+        line-height: 15px;
+        width: 140px;
+        margin-top: 3px;
+        margin-bottom: 3px;
+    }
+
+    .edit-group-button {
+        border-color: #3283fa;
+        border: 1px solid #bbb;
+        height: 26px;
+        line-height: 24px;
+        padding: 0 5px;
+    }
+
+    .group-button-bg {
+        background: #3283fa;
+        color: #fff;
+    }
+
+    .div-pro-view-name {
+        width: 75%;
+    }
+
+    i.hot, i.recommend, i.new {
+        font-size: 12px;
+        margin-right: 10px;
+        font-style: normal;
+        color: #fff;
+        background-color: #E84C3D;
+        border-radius: 2px;
+        padding: 1px 2px;
+    }
+
+    .table th, .table td {text-align: center;}
+</style>
+<script type="text/javascript" src="__STATIC__/My97DatePicker/WdatePicker.js"></script>
+{/block}
+{block name="main"}
+<table class="mytable">
+    <tr>
+        <th style="line-height:33px;">
+            投诉时间：
+            <input type="text" id="startDate" class="input-medium" placeholder="请选择开始日期" onclick="WdatePicker()" />
+            &nbsp;-&nbsp;
+            <input type="text" id="endDate" placeholder="请选择结束日期" class="input-medium" onclick="WdatePicker()" />
+            投诉主题：
+            <select id="complain_subject">
+                <option value="">全部</option>
+                {foreach name="complainSubject" item="v"}
+                <option value="{$v['complain_subject_content']}">{$v['complain_subject_content']}</option>
+                {/foreach}
+            </select>
+            投诉状态：
+            <select id="complain_state">
+                <option value="">全部</option>
+                <option value="20">待申诉</option>
+                <option value="30">对话中</option>
+                <option value="40">待仲裁</option>
+                <option value="99">已关闭</option>
+            </select>
+            <input type="button" onclick="LoadingInfo(1)" value="搜索" />
+        </th>
+    </tr>
+</table>
+<div id="myTabContent" class="tab-content">
+    <div class="tab-pane active">
+        <table class="table table-striped table-main" border="0">
+            <colgroup>
+                <col style="width: 14%;">
+                <col style="width: 40%;">
+                <col style="width: 25%;">
+                <col class="center" style="width: 17%;">
+                <col style="width: 13%;">
+                <col style="width: 7%;">
+            </colgroup>
+            <tr class="table-title" style="background: white; z-index: 10; border: 1px solid #E3E3E3;">
+                <th align="center">投诉人</th>
+                <th class="center">投诉商品</th>
+                <th class="center">投诉主题</th>
+                <th align="center">投诉时间</th>
+                <th class="center">投诉状态</th>
+                <th class="center">操作</th>
+            </tr>
+            <tbody id="list">
+
+            </tbody>
+
+        </table>
+    </div>
+</div>
+
+
+{/block}
+{block name="script"}
+<script type="text/javascript">
+    function LoadingInfo(pageIndex) {
+        var start_date = $("#startDate").val();
+        var end_date = $("#endDate").val();
+        var complain_subject = $("#complain_subject").val();
+        var complain_state=$("#complain_state").val();
+        var shop_id = "{$shop_id}";
+        $.ajax({
+            type : "post",
+            url : "ADMIN_MAIN/Complain/ajaxComplainList",
+            async : true,
+            data : {
+                "pageIndex" : pageIndex,
+                "complain_subject" : complain_subject,
+                "start_date" : start_date,
+                "end_date" : end_date,
+                "complain_state" :complain_state,
+                "shop_id" : shop_id
+            },
+            success : function(data) {
+                var html = '';
+                $("#total_count_num").text(data["total_count"]);
+                $("#page_count_num").text(data["page_count"]);
+                $("#page_count").val(data["page_count"]);
+                $("#pageNumber a").remove();
+                if (data["data"].length > 0) {
+                    for (var i = 0; i < data["data"].length; i++) {
+                        html += '<tr>';
+                        html += '<td class="center">'+data['data'][i]['accuser_user_name']+'</td>';
+//                    <a href="SHOP_MAIN/goods/goodsinfo?goodsid={$vo.goods_id}" target="_blank">{$vo['goods_name']}</a>
+                        html += '<td><a href="SHOP_MAIN/goods/goodsinfo?goodsid='+data["data"][i]["order_goods_id"]+'" target="_blank">'+data['data'][i]['goods_name']+'</td>';
+//                        html += '<td>' + data["data"][i]["accused_shop_name"] + '</td>';
+                        html += '<td class="center">' + data["data"][i]["complain_subject_content"] + '</td>';
+                        html += '<td class="center">' + timeStampTurnTime(data["data"][i]["complain_datetime"])+ '</td>';
+                        switch (data["data"][i]["complain_state"])
+                        {
+                            case 20 :
+                                html += '<td class="center">待申诉</td>';
+                            break;
+                            case 30 :
+                                html += '<td class="center">对话中</td>';
+                                break;
+                            case 40 :
+                                html += '<td class="center">待仲裁</td>';
+                                break;
+                            case 99 :
+                                html += '<td class="center">已关闭</td>';
+                                break;
+                        }
+                        if(data["data"][i]["complain_state"] != 20){
+                            html += '<td class="center"><a href="ADMIN_MAIN/complain/complainDetail?complain_id=' + data["data"][i]["complain_id"] + '">查看</a></td>';
+                        }else{
+                            html += '<td class="center"><a href="ADMIN_MAIN/complain/addComplainApply?complain_id=' + data["data"][i]["complain_id"] + '">申诉</a></td>';
+                        }
+                        html += '</tr>';
+                    }
+                } else {
+                    html += '<tr align="center"><th colspan="8">暂无符合条件的投诉</th></tr>';
+                }
+                $("#list").html(html);
+                var totalpage = $("#page_count").val();
+                if (totalpage == 1) {
+                    changeClass("all");
+                }
+                initPageData(data["page_count"],data['data'].length,data['total_count']);
+                var $html = pagenumShow(jumpNumber,totalpage,{$pageshow})
+                $("#pageNumber").append($html);
+            }
+        });
+    }
+
+</script>
+{/block}

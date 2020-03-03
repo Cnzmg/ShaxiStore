@@ -1,0 +1,178 @@
+{extend name="admin/base" /}
+{block name="main"}
+<div class="set-style">
+    <h3>投诉信息</h3>
+    <dl>
+        <dt>投诉状态 :</dt>
+        <dd>
+            {switch name="complainInfo.complain_state"}
+                {case value="10"}<p>新投诉</p>{/case}
+                {case value="20"}<p>待申诉</p>{/case}
+                {case value="30"}<p>对话中</p>{/case}
+                {case value="40"}<p>待仲裁</p>{/case}
+                {case value="99"}<p>已关闭</p>{/case}
+            {/switch}
+        </dd>
+    </dl>
+    <dl>
+        <dt>投诉主题 :</dt>
+        <dd>
+            <p>{$complainInfo.complain_subject_content}</p>
+        </dd>
+    </dl>
+    <dl>
+        <dt>投诉证据 :</dt>
+        <dd>
+
+            {if condition="$complainInfo.complain_pic1"}<a href="__ROOT__/{$complainInfo.complain_pic1}" target="_blank">投诉证据</a>{/if}&nbsp;&nbsp;
+            {if condition="$complainInfo.complain_pic2"}<a href="__ROOT__/{$complainInfo.complain_pic2}" target="_blank">投诉证据</a>{/if}&nbsp;&nbsp;
+            {if condition="$complainInfo.complain_pic3"}<a href="__ROOT__/{$complainInfo.complain_pic3}" target="_blank">投诉证据</a>{/if}
+
+        </dd>
+    </dl>
+    <dl>
+        <dt>投诉时间 :</dt>
+        <dd>
+            <p>{$complainInfo.complain_datetime|getTimeStampTurnTime}</p>
+        </dd>
+    </dl>
+    <dl>
+        <dt>投诉内容 :</dt>
+        <dd>
+            <p>{$complainInfo.complain_content}</p>
+        </dd>
+    </dl>
+    <h3>申诉信息</h3>
+    <form action="" method="post" id="add_form" enctype="multipart/form-data">
+        <dl>
+            <dt>申诉内容 :</dt>
+            <dd>
+                <textarea class="w600" name="appeal_message" rows="3"></textarea>
+            </dd>
+        </dl>
+        <dl>
+            <dt>上传申诉证据 :</dt>
+            <dd>
+                <p>
+                    <input   hidefocus="true" id="appeal_pic1" nc_type="change_store_label" name="file_upload" type="file" onchange="imgUpload1(this);">
+                    <input type="hidden" id="img1" name="img1" value="" />
+                </p>
+                <p>
+                    <input   hidefocus="true" id="appeal_pic2" nc_type="change_store_label" name="file_upload" type="file" onchange="imgUpload2(this);">
+                    <input type="hidden" id="img2" name="img2" value="" />
+                </p>
+                <p>
+                    <input   hidefocus="true" id="appeal_pic3" nc_type="change_store_label" name="file_upload" type="file" onchange="imgUpload3(this);">
+                    <input type="hidden" id="img3" name="img3" value="" />
+                </p>
+            </dd>
+        </dl>
+        <div class="bottom">
+            <label class="submit-border" style="margin-left: 13rem;margin-top: 2rem;">
+                <input id="submit_button" type="submit" class="submit" value="提交">
+            </label>
+            <label class="submit-border" style="margin-left: 5rem;margin-top: 2rem;">
+                <a href="javascript:history.go(-1);"><input id="concel_button" type="submit" class="submit" value="取消" ></a>
+            </label>
+        </div>
+    </form>
+</div>
+<script src="ADMIN_JS/ajax_file_upload.js" type="text/javascript"></script>
+<script src="__STATIC__/js/file_upload.js" type="text/javascript"></script>
+<script>
+$("#submit_button").click(function () {
+    var complain_id = "{$complainInfo.complain_id}";
+    var appeal_message = $('textarea[name="appeal_message"]').val();
+    var appeal_pic1 = $("#img1").val();
+    var appeal_pic2 = $("#img2").val();
+    var appeal_pic3 = $("#img3").val();
+    if(appeal_message == ''){
+        showTip('请填写申诉信息','error');
+        return false;
+    }
+    $.ajax({
+        type : "post",
+        url : "ADMIN_MAIN/Complain/addComplainApply",
+        data:{
+            'complain_id' : complain_id,
+            'appeal_message' : appeal_message,
+            'appeal_pic1' : appeal_pic1,
+            'appeal_pic2' : appeal_pic2,
+            'appeal_pic3' : appeal_pic3
+        },
+        success:function (data) {
+           if (data["code"] > 0) {
+//                alert(JSON.stringify(data));
+               changeComplainState();
+                showMessage('success', data["message"]);
+               location.href="ADMIN_MAIN/complain/complainList";
+
+            }else{
+                showMessage('error', data["message"]);
+            }
+        }
+
+    });
+});
+
+    function changeComplainState() {
+        var complain_id = "{$complainInfo.complain_id}";
+        $.ajax({
+            type : "post",
+            url : "ADMIN_MAIN/Complain/setComplainTalk",
+            data:{
+                'complain_id' : complain_id
+            },
+            success:function (data) {
+               if (data["code"] > 0) {
+
+                }else{
+                   showMessage('error', data["message"]);
+                   return false;
+                }
+            }
+
+        });
+    }
+    /**
+     *图片上传
+     */
+    function imgUpload1(event) {
+        var fileid = $(event).attr("id");
+        var data = { 'file_path' : UPLOADCOMMON };
+        uploadFile(fileid,data,function(res){
+            if(res.code){
+                $("#img1").val(res.data);
+                showTip(res.message,"success");
+            }else{
+                showTip(res.message,"error");
+            }
+        });
+    }
+    function imgUpload2(event) {
+        var fileid = $(event).attr("id");
+        var data = { 'file_path' : UPLOADCOMMON };
+        uploadFile(fileid,data,function(res){
+            if(res.code){
+                $("#img2").val(res.data);
+                showTip(res.message,"success");
+            }else{
+                showTip(res.message,"error");
+            }
+        });
+    }
+    function imgUpload3(event) {
+        var fileid = $(event).attr("id");
+        var data = { 'file_path' : UPLOADCOMMON };
+        uploadFile(fileid,data,function(res){
+            if(res.code){
+                $("#img3").val(res.data);
+                showTip(res.message,"success");
+            }else{
+                showTip(res.message,"error");
+            }
+        });
+    }
+</script>
+
+{/block}

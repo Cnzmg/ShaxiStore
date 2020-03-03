@@ -1,0 +1,264 @@
+{extend name="shop/blue/base" /}
+{block name="resources"}
+<script type="text/javascript" src="__STATIC__/js/ajax_file_upload.js"></script>
+<script type="text/javascript" src="__STATIC__/js/file_upload.js"></script>
+{include file="shop/default/controlCommonVariable" }
+{/block}
+{block name="main"}
+<div class="margin-w1210">
+	{include file='shop/blue/Member/controlLeftMenu'/}
+	<div class="member-main">
+		<div class="box">
+			<div class="tabmenu">
+				<ul class="tab pngFix">
+					<li class="first active">违规举报</li>
+				</ul>
+			</div>
+			<div class="alert alert-success">
+				<h4>操作提示：</h4>
+				<ul>
+					<li>
+					    1.请提供充分的证据以确保举报成功，请珍惜您的会员权利，帮助商城更好地管理网站；<br>
+					    2.被举报待处理的商品不能反复进行违规提交，处理下架后的商品不能再次举报，商家如重新上架后仍存在违规现象，可再次对该商品进行违规举报；<br>
+					    3.举报仅针对商品或商家本身，如需处理交易中产生的纠纷，请选择投诉；<br>
+					    4.举报时依次选择举报类型及举报主题（必填），填写违规描述（必填，不超过200字），上传3张以内的举证图片（选填），详细的举报内容有助于平台对该条举报的准确处理。
+					</li>
+				</ul>
+			</div>
+	
+			<div class="mar_top">
+			<form action="" method="post" name="theForm">
+				<table width="100%" border="0" cellpadding="10" cellspacing="1" bgcolor="#eeeeee">
+					<tr>
+						<td align="right">被举报商家：</td>
+						<td align="left"><a href="SHOP_MAIN/shop/shopIndex?shop_id={$shopDetail.shop_id}" target="_blank">{$shopDetail.shop_name}</a></td>
+					</tr>
+					<tr>
+						<td align="right">举报相关商品：</td>
+						<td align="left">
+				            <a href="SHOP_MAIN/goods/goodsinfo?goodsid={$goodsDetail.goods_id}" target="_blank" style="display:block;">
+				             	<img src="__ROOT__/{$goodsDetail.picture_detail.pic_cover_micro}">
+			             	</a>
+				            <a href="SHOP_MAIN/goods/goodsinfo?goodsid={$goodsDetail.goods_id}" target="_blank">{$goodsDetail.goods_name}</a>
+						</td>
+					</tr>
+					<tr>
+						<td align="right">举报类型 ：</td>
+						<td align="left" id="inform_type_id">
+							{volist name="$reporttopiclist" id="vo"}
+								<p>
+					                <input id="inform_type_id{$i}" name="inform_type_id" type="radio" value="{$vo.inform_type_id}" {eq name="$i" value="1"}checked="checked"{/eq}>
+					               <label for="inform_type_id{$i}" >
+					                <span class="mr30"><strong>{$vo.inform_type_name}</strong></span>
+					               </label>
+					            </p>
+				                <p class="hint">{$vo.inform_type_desc}</p>
+				            {/volist}
+						</td>
+					</tr>
+					<tr>
+						<td align="right">举报主题：</td>
+						<td align="left">
+							<select id="inform_subject_id" name="inform_subject_id" style="width: 280px; height:25px;">						
+							 
+							</select>
+							<span>(必填)</span>
+						</td>
+					</tr>	
+					<tr>
+						<td align="right">图片：</td>
+						<td align="left">
+				           <p class="mb5">
+				             <input id="inform_pic1" nc_type="change_store_label" name="file_upload" type="file"  onchange="imgUpload1(this);" style="width:64px;opacity:0; z-index: 100; position:absolute; top:2px; left:1px;">
+				             <i style="width: 62px; height:20px; line-height:20px; background:#ccc; border: solid 1px #999;text-align:center; position:absolute; top:2px; left:1px; color: #666;">选择文件</i>
+				             <input type="hidden" id="img1" name="img1" value="" />
+				             <span  id="img_text1" style="position: absolute; top:0; left:75px;">未选择任何文件</span>  
+				           </p>
+				           <p class="mb5">
+				             <input   id="inform_pic2"  nc_type="change_store_label" name="file_upload" type="file" onchange="imgUpload2(this);"  style="width:64px;opacity:0; z-index: 100; position:absolute; top:2px; left:1px;">
+				             <i style="width: 62px; height:20px; line-height:20px; background:#ccc; border: solid 1px #999;text-align:center; position:absolute; top:2px; left:1px; color: #666;">选择文件</i>
+				               <input type="hidden" id="img2" name="img2" value="" />
+				               <span  id="img_text2" style="position: absolute; top:0; left:75px;">未选择任何文件</span>  
+				             <span id="img_text2"></span>
+				           </p>
+				           <p class="mb5">
+				             <input  id="inform_pic3" nc_type="change_store_label" name="file_upload" type="file" onchange="imgUpload3(this);" style="width:64px;opacity:0; z-index: 100; position:absolute; top:2px; left:1px;">
+				               <i style="width: 62px; height:20px; line-height:20px; background:#ccc; border: solid 1px #999;text-align:center; position:absolute; top:2px; left:1px; color: #666;">选择文件</i>
+				               <input type="hidden" id="img3" name="img3" value="" />
+				               <span  id="img_text3" style="position: absolute; top:0; left:75px;">未选择任何文件</span>  
+				             <span id="img_text3"></span>
+				           </p>
+				           <p class="hint">图片只能是jpg/jpeg/gif/png格式</p>
+						</td>
+					</tr>							
+					<tr>
+						<td align="right">内容：</td>
+						<td align="left"><textarea id="inform_content" name="inform_content" /></textarea> <span>(必填)</span></td>
+					</tr>
+					
+					<tr>
+						<td colspan="2" align="center"><input type="button" name="button" class="main-btn common-btn"  value="提交" onclick="save()"/></td>
+					</tr>
+				</table>
+			</form>
+			<div class="blank10"></div>
+			</div>
+		</div>
+	</div>
+</div>	
+{/block}
+{block name="javascript"}
+
+<script type="text/javascript">
+$(function(){ 
+	ajaxinformsubject();
+	$("#inform_type_id input").click(function(){
+		ajaxinformsubject();
+	});
+});  
+
+function ajaxinformsubject()
+{
+	var inform_type_id = $("input:radio:checked").val();
+	$.ajax({
+
+		type:'post',
+		url:'ajaxinformsubject',
+		data:{"inform_type_id":inform_type_id},
+		success:function(data)
+		{		
+			//alert(JSON.stringify(data));
+
+			var option = "<option value=''>请选择...</option>";		
+			if (data["data"].length > 0) 
+			{
+				for (var i = 0; i < data["data"].length; i++)
+				{
+					option += ' <option value="'+data["data"][i]["inform_subject_id"]+'">'+data["data"][i]["inform_subject_content"]+'</option>';
+				}
+
+			}
+			$("#inform_subject_id").html(option); 
+
+		}
+	});	
+}
+
+
+
+
+
+function save()
+{
+	var goodsid="{$goodsDetail['goods_id']}"
+		var inform_subject_id=$("#inform_subject_id option:selected").val();
+		var inform_subject_content=$("#inform_subject_id option:selected").text();
+
+		var inform_content=$("#inform_content").val();
+		var inform_pic1=$("#img1").val();
+		var inform_pic2=$("#img2").val();
+		var inform_pic3=$("#img3").val();
+		
+		if(inform_subject_id == ""){
+			$("#inform_subject_id").next().text("请选择举报主题！").addClass("alerts").prev().focus();
+		return;
+		}
+		else
+		{
+			$("#inform_subject_id").next().text("(必填)").removeClass("alerts");
+		}
+
+		if(inform_content == ""){
+			$("#inform_content").next().text("举报内容不能为空").addClass("alerts").prev().focus();
+		return;
+		}
+		else
+		{
+			$("#business_code").next().text("(必填)").removeClass("alerts");
+		}
+
+	$.ajax({
+		url:'SHOP_MAIN/member/inform',
+		type:'post',
+		data:{
+			"goodsid":goodsid,
+			"inform_subject_id":inform_subject_id,
+			"inform_subject_content":inform_subject_content,
+			"inform_content":inform_content,
+			"inform_pic1":inform_pic1,
+			"inform_pic2":inform_pic2,
+			"inform_pic3":inform_pic3,		
+		},
+		success:function(res){
+			if (res["code"]> 0) {
+				location.href="SHOP_MAIN/member/informlist";
+				$.msg("提交成功!");
+			} else {
+				$.msg("提交失败!");
+			}
+		}
+		
+	})
+	
+}
+//上传图片
+function imgUpload1(event) 
+{
+    var fileid = $(event).attr("id");
+    var data = { 'file_path' : UPLOADCOMMON };
+    uploadFile(fileid,data,function(res){
+    	
+        if(res.code)
+        {
+        	$("#img_text1").text(res.message);
+            $("#img1").val(res.data);
+            showTip(res.message,"success");
+        }
+        else
+        {
+            showTip(res.message,"error");
+        }
+    });
+}
+function imgUpload2(event) 
+{
+    var fileid = $(event).attr("id");
+    var data = { 'file_path' : UPLOADCOMMON };
+    uploadFile(fileid,data,function(res){
+        if(res.code){
+        	$("#img_text2").text(res.message);
+            $("#img2").val(res.data);
+            showTip(res.message,"success");
+        }else{
+            showTip(res.message,"error");
+        }
+    });
+}
+function imgUpload3(event) 
+{
+    var fileid = $(event).attr("id");
+
+    var data = { 'file_path' : UPLOADCOMMON };
+    uploadFile(fileid,data,function(res){
+        if(res.code){
+        	$("#img_text3").text(res.message);
+            $("#img3").val(res.data);
+            showTip(res.message,"success");
+        }else{
+            showTip(res.message,"error");
+        }
+    });
+}
+</script>
+
+<!-- 添加css、字体文件文件 -->
+<style>
+textarea{height:200px;width:500px;}
+#inform_type_id table td p:nth-child(odd){font-size: 14px; color:#000; line-height: 25px;}
+#inform_type_id table td p:nth-child(even){padding-left:20px;}
+#inform_type_id table td p input{width:16px;height:16px; color:#000;}
+.alerts{color:#E31939; background-color:none; padding: 7px 14px;}
+table td .mb5{border: 1px solid #ccc; line-height: 25px; margin-top:5px; width:280px; position: relative; height: 25px;}
+</style>
+
+{/block}

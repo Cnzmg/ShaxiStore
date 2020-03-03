@@ -1,0 +1,195 @@
+{extend name="shop/default/Member/base" /}
+{block name="resources"}
+<script type="text/javascript" src="__STATIC__/js/ajax_file_upload.js"></script>
+<script type="text/javascript" src="__STATIC__/js/file_upload.js"></script>
+{include file="shop/classical/controlCommonVariable" }
+<!-- 添加css、字体文件文件 -->
+<style>
+    textarea{height:200px;width:500px;}
+    #inform_type_id table td p:nth-child(odd){font-size: 14px; color:#000; line-height: 25px;}
+    #inform_type_id table td p:nth-child(even){padding-left:20px;}
+    #inform_type_id table td p input{width:16px;height:16px; color:#000;}
+    .alert{color:#E31939; background-color:none; padding: 7px 14px;}
+    table td .mb5{border: 1px solid #ccc; line-height: 25px; margin-top:5px; width:280px;}
+</style>
+{/block}
+{block name="main"}
+<div class="user-right">
+    <div class="box">
+        <div class="tabmenu">
+            <ul class="tab pngFix">
+                <li class="first active">交易投诉申请</li>
+            </ul>
+        </div>
+        <div class="alert alert-success">
+            <h4>操作提示：</h4>
+            <ul>
+                <li>
+                    1.请提供充分的证据以确保投诉成功，请珍惜您的会员权利，帮助商城更好地管理网站；<br>
+                    2.被投诉待处理的商品不能反复进行投诉，处理下架后的商品不能再次投诉，商家如重新上架后仍存在违规现象，可再次对该商品进行投诉；<br>
+                    3.如需处理交易中产生的纠纷，请选择投诉,仅针对商品或商家本身；<br>
+                    4.投诉时依次选择投诉主题（必填），上传3张以内的投诉图片（选填），填写投诉描述（必填，不超过200字），详细的投诉内容有助于平台对该条投诉的准确处理。
+                </li>
+            </ul>
+        </div>
+
+        <div class="mar_top">
+            <form action="" method="post" name="theForm">
+                <table width="100%" border="0" cellpadding="10" cellspacing="1" bgcolor="#eeeeee">
+                    <tr>
+                        <td align="right">被投诉商家：</td>
+                        <td align="left"><a href="SHOP_MAIN/shop/shopIndex?shop_id={$shopDetail.shop_id}" target="_blank">{$shopDetail.shop_name}</a></td>
+                    </tr>
+                    <tr>
+                        <td align="right">被投诉商品：</td>
+                        <td align="left">
+                            <a href="SHOP_MAIN/goods/goodsinfo?goods_id={$goodsDetail.goods_id}" target="_blank" style="display:block;">
+                                <img src="__ROOT__/{$goodsDetail.picture_detail.pic_cover_micro}">
+                            </a>
+                            <a href="SHOP_MAIN/goods/goodsinfo?goodsid={$goodsDetail.goods_id}" target="_blank">{$goodsDetail.goods_name}</a>
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td align="right">选择投诉主题：</td>
+                        <td>
+                            {volist name="complainSubject" id="com_sub"}
+                                <input name="complain_subject" type="radio" value="{$com_sub.complain_subject_id},{$com_sub.complain_subject_content}" checked="checked">
+                                <span class="mr30"><strong>{$com_sub.complain_subject_content}</strong></span>
+                                <p class="hint">{$com_sub.complain_subject_desc}</p>
+                            {/volist}
+
+                        </td>
+                    </tr>
+                    <tr>
+                        <td align="right">上传投诉证据：</td>
+                        <td align="left">
+                            <p class="mb5">
+                                <input hidefocus="true" id="inform_pic1" nc_type="change_store_label" name="file_upload" type="file" onchange="imgUpload1(this);">
+                                <input type="hidden" id="img1" name="img1" value="" />
+                            </p>
+                            <p class="mb5">
+                                <input  hidefocus="true" id="inform_pic2"  nc_type="change_store_label" name="file_upload" type="file" onchange="imgUpload2(this);">
+                                <input type="hidden" id="img2" name="img2" value="" />
+                            </p>
+                            <p class="mb5">
+                                <input  hidefocus="true"  id="inform_pic3" nc_type="change_store_label" name="file_upload" type="file" onchange="imgUpload3(this);">
+                                <input type="hidden" id="img3" name="img3" value="" />
+                            </p>
+                            <p class="hint">图片只能是jpg/jpeg/gif/png格式</p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td align="right">投诉内容：</td>
+                        <td>
+                            <textarea id="complain_content" name="complain_content" class="textarea w400" ></textarea><span>(必填)</span>
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td colspan="2" align="center"><input type="button" name="button" class="main-btn main-btn-large"  value="提交" ></td>
+                    </tr>
+                </table>
+            </form>
+            <div class="blank10"></div>
+        </div>
+    </div>
+</div>
+{/block}
+{block name="javascript"}
+
+<script type="text/javascript">
+    $(document).ready(function(){
+        $("input[name='button']").click(function(){
+            formSave();
+        });
+    });
+    function formSave(){
+        var order_id = "{$order_id}";
+        var goods_id = "{$goodsDetail.goods_id}";
+        var shop_id = "{$goodsDetail.shop_id}";
+        var memberId = "{$memberInfo.uid}";
+        var member_name = "{$memberInfo.member_name}";
+        var shop_name = "{$shopDetail.shop_name}";
+        var complain_subject = $("input[name='complain_subject']:checked").val();
+        var complain_content = $("#complain_content").val();
+        var complain_pic1=$("#img1").val();
+        var complain_pic2=$("#img2").val();
+        var complain_pic3=$("#img3").val();
+
+        if(complain_content == ""){
+            $("#complain_content").next().text("投诉内容不能为空").addClass("alert").prev().focus();
+            return;
+        }
+        $.ajax({
+            type : 'post',
+            url : "SHOP_MAIN/member/addComplain",
+            data : {
+                'order_id' : order_id,
+                'goods_id' : goods_id,
+                'shop_id' : shop_id,
+                'memberId' : memberId,
+                'member_name' : member_name,
+                'shop_name' : shop_name,
+                'complain_subject' : complain_subject,
+                'complain_content' : complain_content,
+                'complain_pic1' : complain_pic1,
+                'complain_pic2' : complain_pic2,
+                'complain_pic3' : complain_pic3
+            },
+            success :function(data){
+                if(data.code>0){
+                    $.msg("申请提交成功!");
+                    location.href="SHOP_MAIN/member/orderList";
+                }else{
+                    $.msg("申请提交失败");
+                }
+            }
+        });
+    }
+    //上传图片
+    function imgUpload1(event)
+    {
+        var fileid = $(event).attr("id");
+        var data = { 'file_path' : UPLOADCOMMON };
+        uploadFile(fileid,data,function(res){
+            if(res.code){
+                $("#img1").val(res.data);
+                showTip(res.message,"success");
+            }else{
+                showTip(res.message,"error");
+            }
+        });
+    }
+    function imgUpload2(event)
+    {
+        var fileid = $(event).attr("id");
+        var data = { 'file_path' : UPLOADCOMMON };
+        uploadFile(fileid,data,function(res){
+            if(res.code){
+                $("#img2").val(res.data);
+                showTip(res.message,"success");
+            }else{
+                showTip(res.message,"error");
+            }
+        });
+    }
+    function imgUpload3(event)
+    {
+        var fileid = $(event).attr("id");
+
+        var data = { 'file_path' : UPLOADCOMMON };
+        uploadFile(fileid,data,function(res){
+            if(res.code){
+                $("#img3").val(res.data);
+                showTip(res.message,"success");
+            }else{
+                showTip(res.message,"error");
+            }
+        });
+    }
+
+
+
+</script>
+{/block}

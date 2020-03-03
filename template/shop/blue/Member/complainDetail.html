@@ -1,0 +1,364 @@
+{extend name="shop/blue/base" /}
+{block name="resources"}
+<script type="text/javascript" src="__STATIC__/js/ajax_file_upload.js"></script>
+<script type="text/javascript" src="__STATIC__/js/file_upload.js"></script>
+{include file="shop/default/controlCommonVariable" }
+<!-- 添加css、字体文件文件 -->
+<style>
+    textarea{height:200px;width:500px;}
+    #inform_type_id table td p:nth-child(odd){font-size: 14px; color:#000; line-height: 25px;}
+    #inform_type_id table td p:nth-child(even){padding-left:20px;}
+    #inform_type_id table td p input{width:16px;height:16px; color:#000;}
+    .alert{color:#E31939; background-color:none; padding: 7px 14px;}
+    table td .mb5{border: 1px solid #ccc; line-height: 25px; margin-top:5px; width:280px;}
+    .bottom .submit {
+        font: 14px/36px "microsoft yahei";
+        text-align: center;
+        min-width: 100px;
+        height: 36px;
+        background-color: #5BB75B;
+    }
+    input[type="submit"]:hover, input.submit:hover, a.submit:hover {
+        text-decoration: none;
+        color: #FFF;
+        background-color: #5BB75B;
+    }
+    .accused {
+        color: red;
+    }
+    .accuser{
+        color: green;
+    }
+    .ncm-complain-talk {
+        background-color: #FFF;
+        border: 1px dashed #EEE;
+        max-height: 200px;
+        word-break: normal;
+        word-wrap: break-word;
+        padding: 8px;
+        overflow-y: scroll;
+    }
+</style>
+{/block}
+{block name="main"}
+<div class="margin-w1210">
+    {include file='shop/blue/Member/controlLeftMenu'/}
+    <div class="member-main">
+    <div class="box">
+        <!--#51A351-->
+        <div class="tabmenu">
+            <ul class="tab pngFix">
+                {switch name="$complainDetail.complain_state"}
+                {case value="10"}<li class="first active">新投诉</li>{/case}
+                {case value="20"}<li class="first active">待申诉</li>{/case}
+                {case value="30"}<li class="first active">对话中</li>{/case}
+                {case value="40"}<li class="first active">待仲裁</li>{/case}
+                {case value="99"}<li class="first active">已关闭</li>{/case}
+                {/switch}
+
+            </ul>
+        </div>
+
+        <div class="mar_top">
+            <form action="" method="post" name="theForm">
+
+                <table width="100%" border="0" cellpadding="10" cellspacing="1" bgcolor="#eeeeee">
+                    {in name="$complainDetail.complain_state" value="30,40,99"}
+                        <tr><th style="font-size: 1rem;">投诉信息</th></tr>
+                    {/in}
+
+                    <tr>
+                        <td align="right" style="width:120px;">被投诉商家：</td>
+                        <td align="left" style="width:500px;"><a href="SHOP_MAIN/shop/shopIndex?shop_id={$shopDetail.shop_id}">{$shopDetail.shop_name}</a></td>
+                    </tr>
+                    <tr>
+                        <td align="right">被投诉商品：</td>
+                        <td align="left">
+
+                            <a href="SHOP_MAIN/goods/goodsinfo?goodsid={$complainDetail.order_goods_id}" target="_blank" style="display:block;">
+                                <img src="__ROOT__/{$goodsDetail.picture_detail.pic_cover_micro}">
+                            </a>
+                            <a href="SHOP_MAIN/goods/goodsinfo?goodsid={$goodsDetail.goods_id}" target="_blank">{$goodsDetail.goods_name}</a>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td align="right">投诉类型 ：</td>
+                        <td align="left" id="inform_type_id">
+                            <p><span class="mr30"><strong>{$complainDetail.complain_subject_content}</strong></span></p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td align="right">投诉内容：</td>
+                        <td align="left">{$complainDetail.complain_content}</td>
+                    </tr>
+
+                    <tr>
+                        <td align="right">投诉时间：</td>
+                        <td align="left">{$complain_datetime}</td>
+                    </tr>
+
+                    <tr>
+                        <td align="right">投诉证据：</td>
+                        <td align="left">
+                            {notempty name="$complainDetail.complain_pic1"}
+                            <span><img src="__ROOT__/{$complainDetail.complain_pic1}" width="80"></span>
+                            {/notempty}
+                            {notempty name="$complainDetail.complain_pic2"}
+                            <span><img src="__ROOT__/{$complainDetail.complain_pic2}" width="80"></span>
+                            {/notempty}
+                            {notempty name="$$complainDetail.complain_pic3"}
+                            <span><img src="__ROOT__/{$complainDetail.complain_pic3}" width="80"></span>
+                            {/notempty}
+                        </td>
+                    </tr>
+                    {in name="$complainDetail.complain_state" value="30,40,99"}
+                    <tr><th style="font-size: 1rem;">申诉信息</th></tr>
+
+
+                    <tr>
+                        <td align="right">申诉时间：</td>
+                        <td align="left">{$appeal_datetime}</td>
+                    </tr>
+
+                    <tr>
+                        <td align="right">申诉内容：</td>
+                        <td align="left">{$complainDetail.appeal_message}</td>
+                    </tr>
+
+                    <tr>
+                        <td align="right">申诉证据：</td>
+                        <td align="left">
+                            {notempty name="$complainDetail.appeal_pic1"}
+                            <span><img src="__ROOT__/{$complainDetail.appeal_pic1}" width="80"></span>
+                            {/notempty}
+                            {notempty name="$complainDetail.appeal_pic2"}
+                            <span><img src="__ROOT__/{$complainDetail.appeal_pic2}" width="80"></span>
+                            {/notempty}
+                            {notempty name="$$complainDetail.appeal_pic3"}
+                            <span><img src="__ROOT__/{$complainDetail.appeal_pic3}" width="80"></span>
+                            {/notempty}
+                        </td>
+                    </tr>
+
+                    {in name="$complainDetail.complain_state" value="30,40,99"}
+                    <tr><th style="font-size: 1rem;">对话详情</th></tr>
+                    {/in}
+                    <form action="" method="post" id="add_form" enctype="multipart/form-data">
+                            <table width="100%" border="0" cellpadding="10" cellspacing="1" bgcolor="#eeeeee">
+                            <tr>
+                                <td align="right" style="width:120px;">对话记录 :</td>
+                                <td align="left" style="width:500px;">
+                                    <div id="div_talk" class="ncm-complain-talk"></div>
+                                </td>
+                            </tr>
+                                {in name="$complainDetail.complain_state" value="30,40"}
+                            <tr>
+                                <td align="right">发布对话 :</td>
+                                <td align="left">
+                                    <textarea class="w600"  id="complain_talk" name="appeal_message" rows="3"></textarea>
+                                </td>
+                            </tr>
+                            {/in}
+                    </form>
+
+                    {if condition="$complainDetail.complain_state eq 99"}
+                        <tr><th style="font-size: 1rem;">处理结果</th></tr>
+                        <tr>
+                            <td align="right">处理时间 :</td>
+                            <td align="left">{$final_handle_datetime}</td>
+                        </tr>
+                        <tr>
+                            <td align="right">处理结果 :</td>
+                            <td align="left">
+                                <textarea class="w600"   name="handle_result" rows="3">{$complainDetail.final_handle_message}</textarea>
+                            </td>
+                        </tr>
+                    {/if}
+
+                    {in name="$complainDetail.complain_state" value="30,40"}
+                    <tr class="bottom">
+
+                         <td colspan="2" align="center">
+                             <input id="btn_publish" type="button" class="submit" value="发布对话">
+
+
+                            <input id="btn_refresh" type="button" class="submit" value="刷新对话">
+
+                            {if condition="$complainDetail.complain_state neq 40"}
+                                <input id="btn_handle" type="button" class="submit"  value="提交仲裁">
+                             {/if}
+
+                            <a href="javascript:history.go(-1);"><input id="concel_button" type="submit" class="submit" value="取消" ></a>
+                         </td>
+                    </tr>
+                    {/in}
+                    {/in}
+                </table>
+            </form>
+            <div class="blank10"></div>
+        </div>
+    </div>
+</div>
+</div>
+{/block}
+{block name="javascript"}
+<script src="__STATIC__/js/common.js"></script>
+<script type="text/javascript">
+
+    $("#btn_handle").click(function(){
+        if(confirm("确定提交仲裁?提交后管理员将进行裁决")){
+            complainHandle();
+        }
+
+    });
+    //提交仲裁
+    function complainHandle(){
+        var complain_id = "{$complainDetail.complain_id}";
+        $.ajax({
+            type : "post",
+            url : "SHOP_MAIN/member/complainHandle",
+            data : {
+                "complain_id" : complain_id
+            },
+            success : function(data) {
+//                alert(JSON.stringify(data));
+                if(data["code"] > 0 ){
+                    alert('提交仲裁成功');
+                    location.href = "SHOP_MAIN/member/complainList";
+                }else{
+                    alert("提交仲裁失败");
+                }
+            }
+        });
+    }
+    //提交仲裁
+    //    function complainHandle() {
+    //        var complain_id = "{$complainDetail.complain_id}";
+    //        $( "#dialog" ).dialog({
+    //            buttons: {
+    //                "确定": function() {
+    //                    $(this).dialog('close');
+    //                    $.ajax({
+    //                        type : "post",
+    //                        url : "ADMIN_MAIN/complain/complainHandle",
+    //                        data : {
+    //                            "complain_id" : complain_id
+    //                        },
+    //                        success : function(data) {
+    //                            if(data["code"] > 0 ){
+    //                                showMessage('success', "提交仲裁成功","{:url('complainList')}");
+    //                            }else{
+    //                                showMessage('error', "提交仲裁失败");
+    //                            }
+    //                        }
+    //                    })
+    //                },
+    //                "取消,#e57373": function() {
+    //                    $(this).dialog('close');
+    //                }
+    //
+    //            },
+    //            contentText:"确认提交仲裁,提交后管理员将做出裁决",
+    //            title:"消息提醒"
+    //        });
+    //    }
+
+    $(document).ready(function(){
+        get_complain_talk();
+    });
+
+    //发布对话
+    $("#btn_publish").click(function(){
+        if($("#complain_talk").val()=='') {
+            $.msg("对话不能为空",'error');
+        }else {
+            publish_complain_talk();
+        }
+    });
+    //对话刷新
+    $("#btn_refresh").click(function(){
+        get_complain_talk();
+    });
+
+    //获取对话内容
+    function get_complain_talk() {
+        var complain_id = "{$complainDetail.complain_id}";
+        $("#div_talk").empty();
+        $.ajax({
+            type:'POST',
+            url:"SHOP_MAIN/member/getComplainTalk",
+            cache:false,
+            data:{'complain_id' : complain_id},
+            error:function(){
+                $("#div_talk").append("<p class='admin'>"+"目前没有对话"+"</p>");
+            },
+            success:function(talk_list){
+//                alert(JSON.stringify(talk_list));
+                if(talk_list.length >= 1) {
+                    for(var i = 0; i < talk_list.length; i++)
+                    {
+                        switch (talk_list[i].talk_user_type)
+                        {
+                            case 1:
+                                role_name = '投诉人';
+                                break;
+                            case 2:
+                                role_name = '被投诉人';
+                                break;
+                            case 3:
+                                role_name = '平台';
+                                break;
+                        }
+                        switch (talk_list[i].talk_user_type)
+                        {
+                            case 1:
+                                class_css = 'accuser';
+                                break;
+                            case 2:
+                                class_css = 'accused';
+                                break;
+                            case 3:
+                                class_css = 'admin';
+                                break;
+                        }
+                        if(talk_list[i].talk_state ==1){
+                            $("#div_talk").append("<p class='"+class_css+"'>"+timeStampTurnTime(talk_list[i].talk_datetime)+"&nbsp;&nbsp;&nbsp;"+role_name+"&nbsp;&nbsp;&nbsp;"+talk_list[i].talk_user_name+" 说 : &nbsp;&nbsp;&nbsp;"+ talk_list[i].talk_content+"</p>");
+                        }
+
+                    }
+                }
+                else {
+                    $("#div_talk").append("<p class='admin'>"+"目前没有对话"+"</p>");
+                }
+            }
+        });
+    }
+    //发布对话
+    function publish_complain_talk() {
+        var complain_id = "{$complainDetail.complain_id}";
+        var complain_talk = $("#complain_talk").val();
+
+        $.ajax({
+            type:'POST',
+            url:"SHOP_MAIN/member/publishComplainTalk",
+            cache:false,
+            data:{
+                'complain_id' : complain_id,
+                'complain_talk' : complain_talk
+            },
+            success:function(data){
+                if(data['code']>0) {
+                    $("#complain_talk").val('');
+                    get_complain_talk();
+                }
+                else {
+                    alert("对话发送失败");
+                }
+            }
+        });
+    }
+
+
+
+</script>
+{/block}

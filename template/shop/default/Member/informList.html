@@ -1,0 +1,132 @@
+{extend name="shop/default/Member/base" /}
+{block name="resources"}
+<!-- 添加css、字体文件文件 -->
+<script type="text/javascript">
+var shopmain = 'SHOP_MAIN';
+</script>
+<script src="__TEMP__/{$style}/public/js/order.js"></script>
+<style type="text/css">
+.nav_active{background:#E6E6E6; color:#FFF;}
+.tip-box{position: static;  margin-top: 100px;}
+.bought-table .col-name th {
+    border-bottom: 1px solid #E6E6E6;
+    border-top: 1px solid #E6E6E6;
+    color: #999; 
+    height: 45px;
+    text-align: center;
+    background: #fff; 
+    font-style: normal;
+    font-weight: normal;
+}
+.bought-table .baobei .pic {height: 32px; width: 32px;}
+.bought-table .baobei .pic img {height: 30px; width: 30px;}
+.bought-table .baobei .goods_desc {padding-left: 5px; padding-top:0; padding-bottom:0; min-height: 42px;}
+.bought-table .baobei .goods_name {padding:2px 0 0 40px;  height: 16px;}
+.bought-table .order-bd td {border: 0; border-bottom:#E6E6E6 solid 1px;}
+</style>
+{/block}
+{block name="main"}
+<div class="user-right">
+    	<div class="box">
+          <div class="tabmenu">
+            <ul class="tab">
+              <li class="active"> <a href="javascript:void(0);" >举报列表</a> </li>
+            </ul>
+          </div>
+
+          <div class="extra-r" style="display:none">
+            <div class="search-01">
+              <input id="ip_keyword" name="" class="s-itxt" value="商品名称、商品编号、订单编号" onfocus="if (this.value==this.defaultValue) this.value=&#39;&#39;" onblur="if (this.value==&#39;&#39;) this.value=this.defaultValue" onkeydown="javascript:if(event.keyCode==13) OrderSearch(&#39;ip_keyword&#39;);" type="text">
+              <a href="javascript:;" class="btn-13" onclick="OrderSearch(&#39;ip_keyword&#39;)" clstag="click|keycount|orderinfo|search">查 询</a> </div>
+            <div class="blank"></div>
+          </div>
+          <table width="100%" border="0" cellspacing="0" cellpadding="0" class="bought-table">
+            <thead>
+              <tr class="col-name">
+                <th width="50%">相关产品</th>
+                <th width="15%">举报时间</th>
+                <th width="15%">处理时间</th>
+                <th width="10%">处理状态</th>
+                <th width="10%">操作</th>
+              </tr>
+            </thead>
+            <tbody id="list_content" class="close-order">
+			{if condition="count($informList) neq 0"}
+			{volist name="informList" id="inform"}
+			<tr class="order-bd">			
+			<td align="center" class="baobei no-border-right order_goods_info">
+				<div class="goods_desc last">
+					<a class="pic" href="SHOP_MAIN/goods/goodsinfo?goodsid={$inform.inform_goods_id}" title="查看宝贝详情" target="_blank">
+						<img src="__ROOT__/{$inform['inform_goods_image']}" alt="">
+					</a>
+					<a href="SHOP_MAIN/goods/goodsinfo?goodsid={$inform.inform_goods_id}" title="查看宝贝详情" target="_blank">
+						<div class="goods_name">{$inform.inform_goods_name}</div>
+					</a>
+					<div class="goods_name"><span style="color: #999;">商家：</span>{$inform.inform_shop_name}</div>
+				</div> 
+			</td>
+			
+			<td align="center" class="baobei no-border-right order_goods_attr">{$inform.inform_datetime|getTimeStampTurnTime}</td>
+			<td align="center" class="baobei no-border-right order_goods_attr">{$inform.inform_handle_datetime|getTimeStampTurnTime}</td>
+			<td align="center" class="baobei no-border-right order_goods_info">
+			{eq name="$inform.inform_state" value="2"}
+				已处理
+			{else/}
+				未处理
+			{/eq}
+			<br>
+		
+			{switch name="inform.inform_handle_type"}
+				{case value="1"}无效举报{/case}
+				{case value="2"}<span style="background: #E31939; color: #fff;  padding:2px;">恶意举报</span>{/case}
+				{case value="3"}<span style="background: #65bd77; color: #fff; padding:2px;">有效举报</span>{/case}
+			{/switch}
+			
+			
+			</td> 
+			<td align="center" class="trade-status no-border-right">
+				<a href="SHOP_MAIN/member/informdetail?inform_id={$inform.inform_id}" class="main-color">查看</a>
+				{if condition="$inform.inform_state == 1"}
+					 ｜<a class="main-color" onclick="if(confirm('确定取消当前举报?'))delinform({$inform.inform_id})">取消</a>
+				{/if}
+			</td>
+
+			</tr>
+			{/volist}
+			{else/}
+			<tr>
+				<td colspan="8" align="center">
+					<div class="tip-text">您还没有举报信息……</div>
+				</td>
+			</tr>
+			{/if}
+            </tbody>
+            </table>
+{include file='shop/default/controlCommonPage'/}
+        </div>
+    </div>
+
+{/block}
+
+{block name="javascript"}
+{include file='shop/default/openDialog'/}
+<script type="text/javascript">
+ function delinform(inform_id){
+	 $.ajax({
+		 url: "SHOP_MAIN/member/delinform",
+		 type: "post",
+		 data:{"inform_id":inform_id,},
+		 dataType:"json",
+		 success: function(res){
+			 if(res['code']>0){
+				// alert(JSON.stringify(res));
+				 $.msg("取消举报成功");
+				 location.href="SHOP_MAIN/member/informlist";
+			 }
+			
+		 }
+	 })
+	
+ }
+</script>
+{/block}

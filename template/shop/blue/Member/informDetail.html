@@ -1,0 +1,237 @@
+{extend name="shop/blue/base" /}
+{block name="resources"}
+<script type="text/javascript" src="__STATIC__/js/ajax_file_upload.js"></script>
+<script type="text/javascript" src="__STATIC__/js/file_upload.js"></script>
+{include file="shop/default/controlCommonVariable" }
+{/block}
+{block name="main"}
+<div class="margin-w1210">
+{include file='shop/blue/Member/controlLeftMenu'/}
+	<div class="member-main">
+		<div class="box">
+			<div class="tabmenu">
+				<ul class="tab pngFix">
+					<li class="first active">举报详情</li>
+				</ul>
+			</div>
+	
+			<div class="mar_top">
+			<form action="" method="post" name="theForm">
+				<table width="100%" border="0" cellpadding="10" cellspacing="1" bgcolor="#eeeeee">
+					<tr>
+						<td align="right" style="width:120px;">被举报商家：</td>
+						<td align="left" style="width:500px;">{$informdetail.inform_shop_name}</td>
+					</tr>
+					<tr>
+						<td align="right">举报相关商品：</td>
+						<td align="left">
+	
+				            <a href="SHOP_MAIN/goods/goodsinfo?goodsid={$informDetail.inform_goods_id}" target="_blank" style="display:block;">
+				             	<img src="__ROOT__/{$informdetail.inform_goods_image}">
+			             	</a>
+				            <a href="SHOP_MAIN/goods/goodsinfo?goodsid={$informdetail.inform_goods_id}" target="_blank">{$informdetail.goods_name}</a>
+						</td>
+					</tr>
+					<tr>
+						<td align="right">举报类型 ：</td>
+						<td align="left" id="inform_type_id">	
+							<p><span class="mr30"><strong>{$informdetail.inform_subject_type_name}</strong></span></p>
+						</td>
+					</tr>
+					<tr>
+						<td align="right">举报主题：</td>
+						<td align="left">{$informdetail.inform_subject_content}	</td>
+					</tr>	
+							
+					<tr>
+						<td align="right">举报内容：</td>
+						<td align="left">{$informdetail.inform_content}</td>
+					</tr>
+	
+					
+					<tr>
+						<td align="right">图片：</td>
+						<td align="left">
+							{notempty name="$informdetail.inform_pic1"}
+					           <span><img src="__ROOT__/{$informdetail.inform_pic1}" width="80"></span>
+					        {/notempty}
+					        {notempty name="$informdetail.inform_pic2"}
+					           <span><img src="__ROOT__/{$informdetail.inform_pic2}" width="80"></span>
+					        {/notempty}
+					        {notempty name="$informdetail.inform_pic3"}
+					           <span><img src="__ROOT__/{$informdetail.inform_pic3}" width="80"></span>
+					        {/notempty}
+						</td>
+					</tr>
+	
+					{notempty name="$informdetail.inform_handle_message"}
+					<tr>
+						<td align="right">处理内容：</td>
+						<td align="left">{$informdetail.inform_handle_message}</td>
+					</tr>				
+					{/notempty}
+									
+					
+					<tr>
+						<td colspan="2" align="center"><a href="SHOP_MAIN/member/informlist" type="button"  class="main-btn main-btn-large">返回列表</a></td>
+					</tr>
+				</table>
+			</form>
+			<div class="blank10"></div>
+			</div>
+		</div>
+	</div>
+</div>	
+{/block}
+{block name="javascript"}
+
+<script type="text/javascript">
+$(function(){ 
+	ajaxinformsubject();
+	$("#inform_type_id input").click(function(){
+		ajaxinformsubject();
+	});
+});  
+
+function ajaxinformsubject()
+{
+	var inform_type_id = $("input:radio:checked").val();
+	$.ajax({
+
+		type:'post',
+		url:'ajaxinformsubject',
+		data:{"inform_type_id":inform_type_id},
+		success:function(data)
+		{		
+			//alert(JSON.stringify(data));
+
+			var option = "<option value=''>请选择...</option>";		
+			if (data["data"].length > 0) 
+			{
+				for (var i = 0; i < data["data"].length; i++)
+				{
+					option += ' <option value="'+data["data"][i]["inform_subject_id"]+'">'+data["data"][i]["inform_subject_type_name"]+'</option>';
+				}
+
+			}
+			$("#inform_subject_id").html(option); 
+
+		}
+	});	
+}
+
+
+
+
+
+function save()
+{
+	var goodsid="{$informDetail['goods_id']}"
+		var inform_subject_id=$("#inform_subject_id option:selected").val();
+		var inform_subject_content=$("#inform_subject_id option:selected").text();
+
+		var inform_content=$("#inform_content").val();
+		var inform_pic1=$("#img1").val();
+		var inform_pic2=$("#img2").val();
+		var inform_pic3=$("#img3").val();
+		
+		if(inform_subject_id == ""){
+			$("#inform_subject_id").next().text("请选择举报主题！").addClass("alert").prev().focus();
+		return;
+		}
+		else
+		{
+			$("#inform_subject_id").next().text("(必填)").removeClass("alert");
+		}
+
+		if(inform_content == ""){
+			$("#inform_content").next().text("举报内容不能为空").addClass("alert").prev().focus();
+		return;
+		}
+		else
+		{
+			$("#business_code").next().text("(必填)").removeClass("alert");
+		}
+
+	$.ajax({
+		url:'SHOP_MAIN/member/inform',
+		type:'post',
+		data:{
+			"goodsid":goodsid,
+			"inform_subject_id":inform_subject_id,
+			"inform_subject_content":inform_subject_content,
+			"inform_content":inform_content,
+			"inform_pic1":inform_pic1,
+			"inform_pic2":inform_pic2,
+			"inform_pic2":inform_pic3,		
+		},
+		success:function(res){
+			if (res["code"]> 0) {
+				//location.href="SHOP_MAIN/member/feedbacklist";
+				$.msg("提交成功!");
+			} else {
+				$.msg("提交失败!");
+			}
+		}
+		
+	})
+	
+}
+//上传图片
+function imgUpload1(event) 
+{
+    var fileid = $(event).attr("id");
+    var data = { 'file_path' : UPLOADCOMMON };
+    uploadFile(fileid,data,function(res){
+    	
+        if(res.code)
+        {
+            $("#img1").val(res.data);
+            showTip(res.message,"success");
+        }
+        else
+        {
+            showTip(res.message,"error");
+        }
+    });
+}
+function imgUpload2(event) 
+{
+    var fileid = $(event).attr("id");
+    var data = { 'file_path' : UPLOADCOMMON };
+    uploadFile(fileid,data,function(res){
+        if(res.code){
+            $("#img2").val(res.data);
+            showTip(res.message,"success");
+        }else{
+            showTip(res.message,"error");
+        }
+    });
+}
+function imgUpload3(event) 
+{
+    var fileid = $(event).attr("id");
+
+    var data = { 'file_path' : UPLOADCOMMON };
+    uploadFile(fileid,data,function(res){
+        if(res.code){
+            $("#img3").val(res.data);
+            showTip(res.message,"success");
+        }else{
+            showTip(res.message,"error");
+        }
+    });
+}
+</script>
+
+
+<!-- 添加css、字体文件文件 -->
+<style>
+textarea{height:200px;width:500px;}
+#inform_type_id table td p:nth-child(odd){font-size: 14px; color:#000; line-height: 25px;}
+#inform_type_id table td p:nth-child(even){padding-left:20px;}
+#inform_type_id table td p input{width:16px;height:16px; color:#000;}
+.alert{color:#E31939; background-color:none; padding: 7px 14px;}
+table td .mb5{border: 1px solid #ccc; line-height: 25px; margin-top:5px; width:280px;}
+</style>
+{/block}

@@ -1,0 +1,131 @@
+{extend name="shop/blue/base" /}
+{block name="resources"}
+<!-- 添加css、字体文件文件 -->
+<script type="text/javascript">
+    var shopmain = 'SHOP_MAIN';
+</script>
+<script src="__TEMP__/{$style}/public/js/order.js"></script>
+<style type="text/css">
+    .nav_active{background:#E6E6E6; color:#FFF;}
+    .tip-box{position: static;  margin-top: 100px;}
+    .bought-table .col-name th {
+        border-bottom: 1px solid #E6E6E6;
+        border-top: 1px solid #E6E6E6;
+        color: #999;
+        height: 45px;
+        text-align: center;
+        background: #fff;
+        font-style: normal;
+        font-weight: normal;
+    }
+    .bought-table .baobei .pic {height: 32px; width: 32px;}
+    .bought-table .baobei .pic img {height: 30px; width: 30px;}
+    .bought-table .baobei .goods_desc {padding-left: 5px; padding-top:0; padding-bottom:0; min-height: 42px;}
+    .bought-table .baobei .goods_name {padding:2px 0 0 40px;  height: 16px;}
+    .bought-table .order-bd td {border: 0; border-bottom:#E6E6E6 solid 1px;}
+    .bought-table .baobei .goods_name {
+        padding: 2px 0 0 40px;
+        height: 35px;
+    }
+</style>
+{/block}
+{block name="main"}
+<div class="margin-w1210">
+    {include file='shop/blue/Member/controlLeftMenu'/}
+    <div class="member-main">
+    <div class="box">
+        <div class="tabmenu">
+            <ul class="tab">
+                <li class="active"> <a href="javascript:void(0);" >投诉列表</a> </li>
+            </ul>
+        </div>
+
+        <!--<div class="extra-r" style="display:block">-->
+            <!--<div class="search-01">-->
+                <!--<input id="ip_keyword" name="" class="s-itxt" value="商品名称、商品编号、订单编号" onfocus="if (this.value==this.defaultValue) this.value=&#39;&#39;" onblur="if (this.value==&#39;&#39;) this.value=this.defaultValue" onkeydown="javascript:if(event.keyCode==13) OrderSearch(&#39;ip_keyword&#39;);" type="text">-->
+                <!--<a href="javascript:;" class="btn-13" onclick="OrderSearch(&#39;ip_keyword&#39;)" clstag="click|keycount|orderinfo|search">查 询</a> </div>-->
+            <!--<div class="blank"></div>-->
+        <!--</div>-->
+        <table width="100%" border="0" cellspacing="0" cellpadding="0" class="bought-table">
+            <thead>
+            <tr class="col-name">
+                <th width="30%">投诉商品</th>
+                <th width="20%">投诉店铺</th>
+                <th width="20%">投诉时间</th>
+                <th width="15%">处理状态</th>
+                <th width="15%">操作</th>
+            </tr>
+            </thead>
+            <tbody id="list_content" class="close-order">
+            {if condition="count($complainList) neq 0"}
+            {volist name="complainList" id="complain"}
+            <tr class="order-bd">
+                <td align="center" class="baobei no-border-right order_goods_info">
+                    <div class="goods_desc last">
+                        <a class="pic" href="SHOP_MAIN/goods/goodsinfo?goodsid={$complain.order_goods_id}" title="查看宝贝详情" target="_blank">
+                            <img src="__ROOT__/{$complain.goods_info.picture_detail.pic_cover_micro}" alt="">
+                        </a>
+                        <a href="SHOP_MAIN/goods/goodsinfo?goodsid={$complain.order_goods_id}" title="查看宝贝详情" target="_blank">
+                            <div class="goods_name">{$complain.goods_info.goods_name}</div>
+                        </a>
+                    </div>
+                </td>
+                <td align="center" class="baobei no-border-right order_goods_attr"><a href="SHOP_MAIN/shop/shopIndex?shop_id={$complain.shop_detail.base_info.shop_id}" target="_blank">{$complain.shop_detail.base_info.shop_name}</a></td>
+                <td align="center" class="baobei no-border-right order_goods_attr">{$complain.complain_datetime|date="Y-m-d h:m:s",###}</td>
+                <td align="center" class="baobei no-border-right order_goods_info">
+
+                    {switch name="complain.complain_state"}
+                    {case value="10"}<div>新投诉</div>{/case}
+                    {case value="20"}<div>待申诉</div>{/case}
+                    {case value="30"}<div>对话中</div>{/case}
+                    {case value="40"}<div>待仲裁</div>{/case}
+                    {case value="99"}<div>已关闭</div>{/case}
+                    {/switch}
+                </td>
+                <td align="center" class="trade-status no-border-right">
+                    <a href="SHOP_MAIN/member/complainDetail?complain_id={$complain.complain_id}" class="main-color">详情</a>
+                    {if condition="$complain.complain_state == 10"}
+                    ｜<a class="main-color" onclick="if(confirm('确定撤销当前投诉?'))delComplain({$complain.complain_id})">撤销</a>
+                    {/if}
+                </td>
+
+            </tr>
+            {/volist}
+            {else/}
+            <tr>
+                <td colspan="8" align="center">
+                    <div class="tip-text">Sorry！没有找到相关的投诉……</div>
+                </td>
+            </tr>
+            {/if}
+            </tbody>
+        </table>
+        {include file='shop/default/controlCommonPage'/}
+    </div>
+</div>
+</div>
+{/block}
+
+{block name="javascript"}
+{include file='shop/default/openDialog'/}
+<script type="text/javascript">
+    function delComplain(complain_id){
+        $.ajax({
+            url: "SHOP_MAIN/member/delComplain",
+            type: "post",
+            data:{
+
+                'complain_id' : complain_id
+            },
+            success: function(res){
+                if(res['code']>0){
+                    $.msg("撤销投诉成功");
+                    location.href="SHOP_MAIN/member/complainList";
+                }
+
+            }
+        })
+
+    }
+</script>
+{/block}
