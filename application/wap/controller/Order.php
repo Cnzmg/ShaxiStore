@@ -446,15 +446,169 @@ class Order extends BaseController
         return $res;
     }
 
+
+
+
+    private $app_id = 'wx1927c82f6f6502f5';                                                      // Your appid
+    private $mch_id = '1576672991';                                                      // Your 商户号
+    private $makesign = 'RgnAxUlJydTmwkxxDdX7YfRgnAxUlJyd';                                                    // Your API支付的签名(在商户平台API安全按钮中获取)
+    private $parameters=NULL;
+    private $notify='https://pos.cbcoffee.cn/addons/niushop_b2b2c/core/index.php/wap/order/callbackfn';                             //配置回调地址(给pays中转文件上传到根目录下面)
+    private $app_secret='126593898eccd5000351968a7a829638';                                                    //Your appSecret 微信官方获取
+    public $error = 0;
+    public $orderid = null;
+    public $openid = '';
+    public $test = '';
+
     /* test */
-    public function test(){
-        $express_id = 4; // 物流包裹id
-        $res = - 1;
-        $order_service = new OrderService();
-        // $res = $order_service->getOrderGoodsExpressMessage($express_id);
+    public function login($code){
         
-        return $order_service;
+        $token_url = 'https://api.weixin.qq.com/sns/jscode2session?appid=wx1927c82f6f6502f5&secret=126593898eccd5000351968a7a829638&js_code='.$code.'&grant_type=authorization_code';  
+        // return json_decode($res);
+        $ch = curl_init ();
+        curl_setopt ( $ch, CURLOPT_URL, $token_url );
+        curl_setopt ( $ch, CURLOPT_RETURNTRANSFER, 1 );
+        curl_setopt ( $ch, CURLOPT_CUSTOMREQUEST, 'GET' );
+        curl_setopt ( $ch, CURLOPT_TIMEOUT, 60 );
+        curl_setopt ( $ch, CURLOPT_POSTFIELDS, $params );
+        $result = curl_exec ( $ch );
+        curl_close ( $ch );
+
+        // https://api.mch.weixin.qq.com/pay/unifiedorder  //微信支付 api
+        $openid = json_decode($result) -> openid;
+
+        $reannumb = time();  //生成随机数 以后可以当做 订单号
+        $pays ='1';          //获取需要支付的价格·
+
+		#插入语句书写的地方
+        $conf = $this->payconfig('Bm'.$reannumb,$pays * 100, '报名费用支付', $openid);
+        if (!$conf || $conf['return_code'] == 'FAIL') exit("<script>alert('对不起，微信支付接口调用错误!" . $conf['return_msg'] . "');history.go(-1);</script>");
+		$this->orderid = $conf['prepay_id'];
+        //微信相关配置如果不正的话，进入支付页面会出现错误信息
+
+	   //生成页面调用参数
+        $jsApiObj["appId"] = $this->app_id;
+        $timeStamp = time();
+        $jsApiObj["timeStamp"] = "$timeStamp";
+        $jsApiObj["nonceStr"] = $this->createNoncestr();
+        $jsApiObj["package"] = "prepay_id=" . $conf['prepay_id'];
+        $jsApiObj["signType"] = "MD5";
+        $jsApiObj["paySign"] = $this->MakeSign($jsApiObj);
+        
+        $json = json_encode($jsApiObj);
+
+        // $this->test = $this->test."-and-".json_encode($jsApiObj);
+
+        return $json;
+        // return json_encode($this->test);
     }
+
+    public function callbackfn()
+    {
+        return;
+    }
+
+    public function createNoncestr($length = 32){
+        $chars = "abcdefghijklmnopqrstuvwxyz0123456789";
+        $str = "";
+        for ($i = 0; $i < $length; $i++) {
+            $str .= substr($chars, mt_rand(0, strlen($chars) - 1), 1);
+        }
+        return $str;
+    }
+
+    protected function MakeSign($arr)
+    {
+        //签名步骤一：按字典序排序参数
+        ksort($arr);
+        $string = $this->ToUrlParams($arr);
+        //签名步骤二：在string后加入KEY
+        $string = $string . "&key=" . $this->makesign;
+
+        // $this->test = $string;
+
+        //签名步骤三：MD5加密
+        $string = md5($string);
+        //签名步骤四：所有字符转为大写
+        $result = strtoupper($string);
+        return $result;
+    }
+
+    protected function ToUrlParams($arr)
+    {
+        $buff = "";
+        foreach ($arr as $k => $v) {
+            if ($k != "sign" && $v != "" && !is_array($v)) {
+                $buff .= $k . "=" . $v . "&";
+            }
+        }
+
+        $buff = trim($buff, "&");
+        return $buff;
+    }
+
+    #微信JS支付参数获取#
+    protected function payconfig($no, $fee, $body, $openid)
+    {
+        $url = "https://api.mch.weixin.qq.com/pay/unifiedorder";
+        $data['appid'] = 'wx1927c82f6f6502f5';
+        $data['mch_id'] = '1576672991';                       //商户号
+        $data['device_info'] = 'WEB';
+        $data['body'] = $body;
+        $data['out_trade_no'] = $no;                           //订单号
+        $data['total_fee'] = $fee;                             //金额
+        $data['spbill_create_ip'] = $_SERVER["REMOTE_ADDR"];   //ip地址
+        $data['notify_url'] = $this->notify;
+        $data['trade_type'] = 'JSAPI';
+        $data['openid'] = $openid;                 //用户的openid
+        $data['nonce_str'] = $this->createNoncestr();
+        $data['sign'] = $this->MakeSign($data);
+		
+		
+        $xml = $this->ToXml($data);
+        $curl = curl_init(); // 启动一个CURL会话
+		
+        curl_setopt($curl, CURLOPT_URL, $url); // 要访问的地址
+        curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, FALSE);
+        curl_setopt($curl, CURLOPT_SSL_VERIFYHOST, FALSE);
+		
+        //设置header
+        curl_setopt($curl, CURLOPT_HEADER, FALSE);
+		
+        //要求结果为字符串且输出到屏幕上
+        curl_setopt($curl, CURLOPT_RETURNTRANSFER, TRUE);
+        curl_setopt($curl, CURLOPT_POST, TRUE); // 发送一个常规的Post请求
+        curl_setopt($curl, CURLOPT_POSTFIELDS, $xml); // Post提交的数据包
+        curl_setopt($curl, CURLOPT_TIMEOUT, 30); // 设置超时限制防止死循环
+        $tmpInfo = curl_exec($curl); // 执行操作
+        curl_close($curl); // 关闭CURL会话
+        $arr = $this->FromXml($tmpInfo);
+        return $arr;
+    }
+    public function ToXml($arr)
+    {
+        $xml = "<xml>";
+        foreach ($arr as $key => $val) {
+            if (is_numeric($val)) {
+                $xml .= "<" . $key . ">" . $val . "</" . $key . ">";
+            } else {
+                $xml .= "<" . $key . "><![CDATA[" . $val . "]]></" . $key . ">";
+            }
+        }
+        $xml .= "</xml>";
+        return $xml;
+    }
+    public function FromXml($xml)
+    {
+        //将XML转为array
+        return json_decode(json_encode(simplexml_load_string($xml, 'SimpleXMLElement', LIBXML_NOCDATA)), true);
+    }
+
+
+
+
+
+
 
     /**
      * 订单项退款详情

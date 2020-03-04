@@ -125,7 +125,7 @@
 		 
 
 		 var xml = new XMLHttpRequest();
-			xml.open('post', 'http://uin8.com:8082/express', true)
+			xml.open('post', 'https://www.uin8.com/express', true)
 			xml.setRequestHeader('Content-type', 'application/json');
 			xml.onreadystatechange = function(){
 				console.log(JSON.parse(xml.responseText))

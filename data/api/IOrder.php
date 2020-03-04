@@ -584,4 +584,5 @@ interface IOrder
      * @param unknown $order_id            
      */
     function getOrderSellerMemo($order_id);
+
 }
