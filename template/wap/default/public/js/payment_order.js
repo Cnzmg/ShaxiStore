@@ -649,7 +649,7 @@ function submitOrder() {
 						// location.href = APPMAIN + '/pay/getpayvalue?out_trade_no=' + res.code;
 						// 微信支付的时候跳转  小程序支付哦
 						wx.miniProgram.navigateTo({
-							url: '/pages/pay/pay',
+							url: '/pages/pay/pay?orderId=' + res.code +'&money=' +parseFloat($("#realprice").attr("data-total-money")),
 						});
 					}
 				} else {

@@ -175,7 +175,6 @@ class Pay extends Controller
             $check_sign = $pay->checkSign($postObj, $postObj->sign);
             if ($postObj->result_code == 'SUCCESS'&&$check_sign == 1) {
              
-                
                 $retval = $pay->onlinePay($postObj->out_trade_no, 1);
                 $xml = "<xml>
                     <return_code><![CDATA[SUCCESS]]></return_code>
@@ -201,6 +200,10 @@ class Pay extends Controller
         $msg = isset($_GET['msg']) ? $_GET['msg'] : '';
         $this->assign("status", $msg);
         $this->assign("out_trade_no", $out_trade_no);
+        
+        $pay = new UnifyPay();
+        $retval = $pay->onlinePay($out_trade_no, 1);  //【 更改顶戴支付状态 】
+        
         if (request()->isMobile()) {
             return view($this->style . "/Pay/payCallback");
         } else {
@@ -336,12 +339,6 @@ class Pay extends Controller
             }
             // echo "验证失败";
         }
-    }
-
-    public function wxpays()
-    {  //微信 jsapi 支付
-        $code = 'successfull'
-        return $code
     }
 
 }

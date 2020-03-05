@@ -35,6 +35,53 @@
 		border-bottom:2px solid rgb(245, 183, 8);
 		}
 	</style>
+
+
+	<style>
+		.result-top {
+			width: 918px;
+			height: 43px;
+			background-color: #ffffff;
+			/* border: 1px solid #a2bbda; */
+			border-bottom: none;
+		}
+		.result-top span, .result-top a {
+			display: inline-block;
+			height: 43px;
+			line-height: 43px;
+			vertical-align: middle;
+			font-size: 14px;
+		}
+		.result-top .col1 {
+			width: 90px;
+			text-align: center;
+			color: #323232;
+			cursor: pointer;
+			padding-left: 14px;
+			font-size: 16px;
+		}
+		.result-top .col2 {
+			width: 303px;
+			text-align: left;
+			font-size: 16px;
+			color: #5a5a5a;
+			padding-left: 50px;
+		}
+		.result-info .last td, .result-info .last td a {
+			color: #ff7800;
+			border-bottom: none;
+		}
+		.result-info .row1 {
+			width: 105px;
+			text-align: center;
+			padding-left: 14px;
+			padding-right: 0;
+		}
+		.result-info td {
+			padding: 7px;
+			color: #828282;
+		}	
+	</style>
 {/block}
 
 {block name="goodsHead"}
@@ -68,7 +115,7 @@
 		    {if condition="$vo['is_express'] eq 1"}
 		    	<div style="background:#fff;" class="express_goods">
 		    		<span>共{$vo['order_goods_list']|count}件商品，由{$vo['express_name']}承运</span><br/>
-		    		<span>运单编号：{$vo['express_code']}</span>
+		    		<span id="expressCode">运单编号：{$vo['express_code']}</span>
 				</div>
 				
 				<div id="expressBox"></div>
@@ -125,15 +172,15 @@
 		 
 
 		 var xml = new XMLHttpRequest();
+		 	$('#expressBox').html('物流跟踪信息正在快马加鞭获取中~~~');
 			xml.open('post', 'https://www.uin8.com/express', true)
 			xml.setRequestHeader('Content-type', 'application/json');
 			xml.onreadystatechange = function(){
-				console.log(JSON.parse(xml.responseText))
-				$('#expressBox').html(JSON.parse(xml.responseText).data)
+				$('#expressBox').html(JSON.parse(xml.responseText).data);
 			}
 			xml.send(JSON.stringify({
 				ExpressName: 'zhongtong',
-				ExpressCode: '73119782411952' 
+				ExpressCode: document.getElementById('expressCode').innerHTML.split('：')[1] 
 			}))
 			
 

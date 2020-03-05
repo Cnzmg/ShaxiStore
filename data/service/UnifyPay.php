@@ -288,7 +288,7 @@ class UnifyPay extends BaseService implements IUnifyPay
      * (non-PHPdoc)
      * @see \data\api\IUnifyPay::getWxJsApi()
      */
-    public function getWxJsApi($UnifiedOrderResult)
+    public function getWxJsApi($UnifiedOrderResult)     // ①  获取 js api 支付 【 out id 33，type，回调地址url 】
     {
         $weixin_pay = new WeiXinPay();
         $retval = $weixin_pay->GetJsApiParameters($UnifiedOrderResult);

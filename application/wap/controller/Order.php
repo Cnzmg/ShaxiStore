@@ -447,13 +447,13 @@ class Order extends BaseController
     }
 
 
-
+    //    微信小程序支付  //  2020-03-05  jk cnzmg
 
     private $app_id = 'wx1927c82f6f6502f5';                                                      // Your appid
     private $mch_id = '1576672991';                                                      // Your 商户号
     private $makesign = 'RgnAxUlJydTmwkxxDdX7YfRgnAxUlJyd';                                                    // Your API支付的签名(在商户平台API安全按钮中获取)
     private $parameters=NULL;
-    private $notify='https://pos.cbcoffee.cn/addons/niushop_b2b2c/core/index.php/wap/order/callbackfn';                             //配置回调地址(给pays中转文件上传到根目录下面)
+    private $notify='https://pos.cbcoffee.cn/addons/niushop_b2b2c/core/index.php/wap/Pay/wchatUrlBack';                             //配置回调地址(给pays中转文件上传到根目录下面)
     private $app_secret='126593898eccd5000351968a7a829638';                                                    //Your appSecret 微信官方获取
     public $error = 0;
     public $orderid = null;
@@ -461,7 +461,7 @@ class Order extends BaseController
     public $test = '';
 
     /* test */
-    public function login($code){
+    public function login($code, $money){
         
         $token_url = 'https://api.weixin.qq.com/sns/jscode2session?appid=wx1927c82f6f6502f5&secret=126593898eccd5000351968a7a829638&js_code='.$code.'&grant_type=authorization_code';  
         // return json_decode($res);
@@ -478,9 +478,10 @@ class Order extends BaseController
         $openid = json_decode($result) -> openid;
 
         $reannumb = time();  //生成随机数 以后可以当做 订单号
-        $pays ='1';          //获取需要支付的价格·
+        $pays = $money;          //获取需要支付的价格·
 
 		#插入语句书写的地方
+        // $conf = $this->payconfig('Bm'.$reannumb,$pays * 100, '报名费用支付', $openid);
         $conf = $this->payconfig('Bm'.$reannumb,$pays * 100, '报名费用支付', $openid);
         if (!$conf || $conf['return_code'] == 'FAIL') exit("<script>alert('对不起，微信支付接口调用错误!" . $conf['return_msg'] . "');history.go(-1);</script>");
 		$this->orderid = $conf['prepay_id'];
@@ -501,11 +502,6 @@ class Order extends BaseController
 
         return $json;
         // return json_encode($this->test);
-    }
-
-    public function callbackfn()
-    {
-        return;
     }
 
     public function createNoncestr($length = 32){
@@ -605,7 +601,7 @@ class Order extends BaseController
     }
 
 
-
+    //  jk cnzmg code over  //
 
 
 

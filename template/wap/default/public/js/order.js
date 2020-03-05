@@ -9,10 +9,13 @@
  * @param no
  * @param order_id
  */
-function operation(no,order_id){
+function operation(no,order_id,money){
 	switch(no){
 	case 'pay'://支付
-		pay(order_id);
+		// pay(order_id);
+		wx.miniProgram.navigateTo({
+			url: '/pages/pay/pay?orderId=' + order_id +'&money=' +money,
+		});
 		break;
 	case 'close'://订单关闭
 		orderClose(order_id);
