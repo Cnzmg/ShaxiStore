@@ -103,18 +103,18 @@ class Member extends BaseController
                 '收货地址',
                 'member/memberAddress?flag=1' . (empty($this->shop_id) ? '' : '&shop_id=' . $this->shop_id)
             ),
-            'withdrawals' => array(
-                '提现账号',
-                'member/accountList' . $get_shop . $account_flag
-            ),
-            'qr_code' => array(
-                '推广二维码',
-                'member/getWchatQrcode' 
-            ),
-            "shop_code" => array(
-                '店铺二维码',
-                'member/getShopQrcode' . $get_shop
-            ),
+            // 'withdrawals' => array(
+            //     '提现账号',
+            //     'member/accountList' . $get_shop . $account_flag
+            // ),
+            // 'qr_code' => array(
+            //     '推广二维码',
+            //     'member/getWchatQrcode' 
+            // ),
+            // "shop_code" => array(
+            //     '店铺二维码',
+            //     'member/getShopQrcode' . $get_shop
+            // ),
             "memberCoupon" => array(
                 '优惠券',
                 'member/memberCoupon' . $get_shop
