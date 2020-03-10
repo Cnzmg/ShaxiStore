@@ -63,7 +63,7 @@ class Member extends BaseController
         $is_action=Request::instance()->action();
         $uid = $this->uid;
         if (empty($uid)) {
-            $this->redirect("login/index"); // 用户未登录
+            $this->redirect("login/index"); // 用户未登录 
         }
         $is_member = $this->user->getSessionUserIsMember();
         if (empty($is_member)) {
@@ -95,10 +95,10 @@ class Member extends BaseController
         // 基本信息行级显示菜单项
          $member_menu_arr = array(
             
-            'personal' => array(
-                '个人资料',
-                'member/personaldata' . $get_shop
-            ),
+            // 'personal' => array(
+            //     '个人资料',
+            //     'member/personaldata' . $get_shop
+            // ),
             'address' => array(
                 '收货地址',
                 'member/memberAddress?flag=1' . (empty($this->shop_id) ? '' : '&shop_id=' . $this->shop_id)

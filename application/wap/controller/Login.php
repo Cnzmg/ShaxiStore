@@ -107,10 +107,10 @@ class Login extends Controller
                 $_SESSION['request_url'] = request()->url(true);
             }
             $domain_name = \think\Request::instance()->domain();
-            if (! empty($_COOKIE[$domain_name . "member_access_token"])) {
+            if (! empty($_COOKIE[$domain_name . "member_access_token"])) {  //存在会员 token
                 $token = json_decode($_COOKIE[$domain_name . "member_access_token"], true);
             } else {
-                $wchat_oauth = new WchatOauth();
+                $wchat_oauth = new WchatOauth();  //不存在会员token 
                 $token = $wchat_oauth->get_member_access_token();
                 if (! empty($token['access_token'])) {
                     setcookie($domain_name . "member_access_token", json_encode($token));
@@ -127,16 +127,16 @@ class Login extends Controller
                         $this->redirect(__URL__."/wap/Login/userLock");
                     } else {
                         $retval = $this->user->wchatLogin($token['openid']);
-                        if ($retval == USER_NBUND) {
+                        if ($retval == USER_NBUND) {   
                             $info = $wchat_oauth->get_oauth_member_info($token);
                             
-                            $result = $this->user->registerMember('', '123456', '', '', '', '', $token['openid'], $info, $wx_unionid);
+                            $result = $this->user->registerMember('', '123456', '', '', '', '', $token['openid'], $info, $wx_unionid);  //执行用户注册
                         } elseif ($retval == USER_LOCK) {
                             // 锁定跳转
                             $this->redirect(__URL__."/wap/Login/userLock");
                         }
                     }
-                } else {
+                } else { // 当前未注册
                     $wx_unionid = '';
                     $retval = $this->user->wchatLogin($token['openid']);
                     if ($retval == USER_NBUND) {

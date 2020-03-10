@@ -88,7 +88,7 @@
 	</section> -->
 <div class="panel memberhead">
 	<div class="member_head">
-		<a href="APP_MAIN/member/personaldata?shop_id={$shop_id}">
+		<!-- <a href="APP_MAIN/member/personaldata?shop_id={$shop_id}"> -->
 			<p style="float:left;margin: 20px 0 20px 20px;position:relative;">
 				<i>
 				{eq name="member_img" value="0"}
@@ -99,11 +99,11 @@
 				</i>
 			</p>
 			<p class="member" style="text-align:left;margin-right: 20px;margin-top: 40px;">
-				<img src="__TEMP__/{$style}/public/images/edit.png" style="float:right;width:20px; margin: 0 10px 0 0;">
+				<!-- <img src="__TEMP__/{$style}/public/images/edit.png" style="float:right;width:20px; margin: 0 10px 0 0;"> -->
 				<span class="namer" style="font-size:14px;"><!-- 会员名： -->{$member_info["user_info"]['nick_name']}</span>
 				<span style="font-size:14px;position: absolute;font-size: 12px;top: 60px;left: 103px;">{$member_info['level_name']}</span>
 			</p>
-		</a>
+		<!-- </a> -->
 		{if condition="$integralconfig['sign_integral'] eq 1"}
 		{if condition="$isSign eq 0"}
 		<span class="signin no" onclick="signIn();">签到</span>
