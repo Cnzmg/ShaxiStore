@@ -95,6 +95,58 @@ class Login extends Controller
         $this->assign("style", 'wap/default');
     }
 
+
+    //  注册小程序用户
+    public function testlogin(){
+        
+        $code = request()->post('code');
+
+        $token_url = 'https://api.weixin.qq.com/sns/jscode2session?appid=wx1927c82f6f6502f5&secret=126593898eccd5000351968a7a829638&js_code='.$code.'&grant_type=authorization_code';
+
+        $ch = curl_init ();
+        curl_setopt ( $ch, CURLOPT_URL, $token_url );
+        curl_setopt ( $ch, CURLOPT_RETURNTRANSFER, 1 );
+        curl_setopt ( $ch, CURLOPT_CUSTOMREQUEST, 'GET' );
+        curl_setopt ( $ch, CURLOPT_TIMEOUT, 60 );
+        curl_setopt ( $ch, CURLOPT_POSTFIELDS, $params );
+        $result = curl_exec ( $ch );
+        curl_close ( $ch );
+        
+        $json = json_encode($result);
+
+        // if($json['openid'] == 'ozTu25OYRoP_y2k53vQ02XR0Nttk'){
+        //     $json['code'] = 200;
+        // }
+
+        return $result;
+    }
+
+    //  测试注册 成功用户
+    public function testadd()
+    {
+        $member = new Member();
+        $retval = $member->registerMember('66666666', '66666666', '', '', '', '', '66666666', '', '');
+        
+        // $json = json_encode($result);
+
+        $user = new Member();
+        $code = $user -> getMemberList(1, 10000);
+
+        foreach ($code['data'] as $key) {  //已经存在的会员
+            if($key['user_name'] == 'coffee'){
+                $json = json_encode($key);
+                break;
+            }else{  //不存在会员
+                $errorcode['code'] = 500;
+                $json = json_encode($errorcode);
+            }
+        }
+        // $json = json_encode($code);
+        return $json;
+    }
+
+
+
     /**
      * 检测微信浏览器并且自动登录
      */
@@ -127,7 +179,7 @@ class Login extends Controller
                         $this->redirect(__URL__."/wap/Login/userLock");
                     } else {
                         $retval = $this->user->wchatLogin($token['openid']);
-                        if ($retval == USER_NBUND) {   
+                        if ($retval == USER_NBUND) {
                             $info = $wchat_oauth->get_oauth_member_info($token);
                             
                             $result = $this->user->registerMember('', '123456', '', '', '', '', $token['openid'], $info, $wx_unionid);  //执行用户注册
