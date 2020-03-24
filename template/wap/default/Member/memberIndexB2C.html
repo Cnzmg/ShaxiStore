@@ -92,7 +92,8 @@
 			<p style="float:left;margin: 20px 0 20px 20px;position:relative;">
 				<i>
 				{eq name="member_img" value="0"}
-					<img src="__TEMP__/{$style}/public/images/member_default.png"/>
+					<!-- <img src="__TEMP__/{$style}/public/images/member_default.png"/> -->
+					<img src="http://test.cbcoffee.cn/rundev/images/product.png" id="img_" />
 				{else/}
 					<img src="__UPLOAD__/{$member_img}" />
 				{/eq}
@@ -199,6 +200,11 @@ function signIn(){
 			}
 		}
 	})
+}
+window.onload = function(){
+	console.log(JSON.parse(localStorage.getItem('user')))
+	$('#img_').attr('src', JSON.parse(localStorage.getItem('user')).avatarUrl);
+	$('.namer').html(JSON.parse(localStorage.getItem('user')).nickName);
 }
 </script>
 {/block}

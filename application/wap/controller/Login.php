@@ -96,12 +96,15 @@ class Login extends Controller
     }
 
 
+    public $openid = '';
     //  注册小程序用户
-    public function testlogin(){
+    public function resGrant(){
         
         $code = request()->post('code');
 
         $token_url = 'https://api.weixin.qq.com/sns/jscode2session?appid=wx1927c82f6f6502f5&secret=126593898eccd5000351968a7a829638&js_code='.$code.'&grant_type=authorization_code';
+
+        $json = '';
 
         $ch = curl_init ();
         curl_setopt ( $ch, CURLOPT_URL, $token_url );
@@ -112,16 +115,38 @@ class Login extends Controller
         $result = curl_exec ( $ch );
         curl_close ( $ch );
         
-        $json = json_encode($result);
+        $openid = json_decode($result) -> openid;
 
-        // if($json['openid'] == 'ozTu25OYRoP_y2k53vQ02XR0Nttk'){
-        //     $json['code'] = 200;
-        // }
+        $user = new Member();
+        $memberList = $user -> getMemberList(1, 100000);
+        $bool = true;
+        foreach ($memberList['data'] as $keys){
+            if($keys['user_name'] == $openid){   //使用openid 作为用户登陆名称
+                $json['openids'] = $openid;
+                $json['code'] = 202;
+                $bool = !$bool;
+                break;
+            }
+        }
+        if($bool){
+            //不存在用户时候 创建新用户
+            /*
+            * if ($) 用户名称
+            * if ($) 用户密码
+            * if ($) *******
+            * if ($) 用户openId
+            */
+            $retval = $user->registerMember($openid, '66666666', '', '', '', '', $openid, '', '');
+            $json['openids'] = $openid;
+            $json['code'] = 200;
+            
+        }
+        $jsons = json_encode($json);
 
-        return $result;
+        return $jsons;
     }
 
-    //  测试注册 成功用户
+    //  测试注册 成功用户   *************  已废弃   ***************
     public function testadd()
     {
         $member = new Member();
@@ -130,7 +155,7 @@ class Login extends Controller
         // $json = json_encode($result);
 
         $user = new Member();
-        $code = $user -> getMemberList(1, 10000);
+        $code = $user -> getMemberList(1, 10000);   //暂时查询 1000 条记录
 
         foreach ($code['data'] as $key) {  //已经存在的会员
             if($key['user_name'] == 'coffee'){

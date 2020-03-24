@@ -6,11 +6,40 @@
 <meta name="description" content="{$seoconfig.seo_desc}"/>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<script src="__TEMP__/{$style}/public/js/jquery.js"></script>
 <script type="text/javascript" src="https://res.wx.qq.com/open/js/jweixin-1.3.2.js"></script>
 <script>
-	wx.miniProgram.reLaunch({
-		url: '/pages/login/login'
-	});
+	window.onload = function () {
+            function getStrings() {
+                var req = new RegExp("(^|&)" + arguments[0] + "=([^&]*)(&|$)", "i"), res = window.location.search.substr(1).match(req);
+                if (res != null) return decodeURI(res[2]);
+                return null;
+            }
+			console.log(getStrings('openid'));
+			if(!getStrings('openid')){
+				wx.miniProgram.reLaunch({
+					url: '/pages/login/login'
+				});
+			}else{
+				localStorage.setItem('user', getStrings('user'));
+				$.ajax({
+					type : "post",
+					url : "APP_MAIN/Login/index",
+					async : true,
+					data : {
+						"username" : getStrings('openid'),
+						"password" : '66666666'
+					},
+					success : function(data) {
+						setTimeout(function(){
+							wx.miniProgram.reLaunch({
+								url: '/pages/index/index'
+							});
+						},1000);
+					}
+				});
+			}
+        }
 </script>
 </head>
 <body>
